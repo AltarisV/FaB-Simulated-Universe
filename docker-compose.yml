@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+
+  universe-creation:
+    build:
+      context: services/simulated-universe/creation
+    ports:
+      - "8080:8080"
+    volumes:
+      - chromadb-data:/var/lib/chromadb
+    networks:
+      - backend
+    depends_on:
+      - chroma_db
+    env_file:
+      - .env
+
+  universe-generation:
+    build:
+      context: services/simulated-universe/generation
+    ports:
+      - "8081:8081"
+    networks:
+      - backend
+    depends_on:
+      - chroma_db
+    env_file:
+      - .env
+
+  universe-persistence:
+    build:
+      context: services/simulated-universe/persistence
+    ports:
+      - "8082:8082"
+    volumes:
+      - chromadb-data:/var/lib/chromadb
+    networks:
+      - backend
+    depends_on:
+      - chroma_db
+    env_file:
+      - .env
+
+  chroma_db:
+    image: chromadb/chroma:latest
+    container_name: local-chromadb
+    ports:
+      - "8083:8000"
+    volumes:
+      - chromadb-data:/var/lib/chromadb
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
+
+  chromadb-data:
+    driver: local
